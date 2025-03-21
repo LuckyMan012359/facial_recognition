@@ -1,29 +1,29 @@
 import { useMemo } from 'react'
-import Avatar from '@/components/ui/Avatar'
 import Tag from '@/components/ui/Tag'
 import Tooltip from '@/components/ui/Tooltip'
 import DataTable from '@/components/shared/DataTable'
 import useLeaveList from '../hooks/useLeaveList'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import cloneDeep from 'lodash/cloneDeep'
-import { TbPencil, TbEye } from 'react-icons/tb'
+import { TbPencil } from 'react-icons/tb'
 import type { OnSortParam, ColumnDef, Row } from '@/components/shared/DataTable'
 import type { Leave } from '../types'
 import type { TableQueries } from '@/@types/common'
+import { RiMessage2Fill } from 'react-icons/ri'
 
 const statusColor: Record<string, string> = {
     Approved:
         'bg-emerald-200 dark:bg-emerald-200 text-gray-900 dark:text-gray-900',
-    Declined: 'bg-red-500 dark:bg-red-500 text-black dark:text-black',
+    Declined: 'bg-[#ff4d4d] dark:bg-[#ff4d4d] text-black dark:text-black',
     Pending: 'bg-red-300 dark:bg-red-300 text-gray-900 dark:text-gray-900',
 }
 
 const ActionColumn = ({
     onEdit,
-    onViewDetail,
+    data,
 }: {
     onEdit: () => void
-    onViewDetail: () => void
+    data: Leave
 }) => {
     return (
         <div className="flex gap-3 items-center">
@@ -36,15 +36,16 @@ const ActionColumn = ({
                     <TbPencil />
                 </div>
             </Tooltip>
-            <Tooltip title="View">
-                <div
-                    className={`text-xl cursor-pointer select-none font-semibold`}
-                    role="button"
-                    onClick={onViewDetail}
-                >
-                    <TbEye />
-                </div>
-            </Tooltip>
+            {data.comment && data.comment != '' && (
+                <Tooltip title={data.comment} placement="top-start">
+                    <div
+                        className={`text-xl cursor-pointer select-none font-semibold`}
+                        role="button"
+                    >
+                        <RiMessage2Fill />
+                    </div>
+                </Tooltip>
+            )}
         </div>
     )
 }
@@ -65,10 +66,6 @@ const LeaveListTable = () => {
 
     const handleEdit = (leave: Leave) => {
         navigate(`/leave-edit/${leave._id}`)
-    }
-
-    const handleViewDetails = (leave: Leave) => {
-        navigate(`/employee-details/${leave._id}`)
     }
 
     const columns: ColumnDef<Leave>[] = useMemo(
@@ -118,9 +115,7 @@ const LeaveListTable = () => {
                 cell: (props) => (
                     <ActionColumn
                         onEdit={() => handleEdit(props.row.original)}
-                        onViewDetail={() =>
-                            handleViewDetails(props.row.original)
-                        }
+                        data={props.row.original}
                     />
                 ),
             },
